@@ -26,8 +26,7 @@ public class Login {
     public boolean checkUserName(String username) {
         return username.contains("_") && username.length() <= 5;
     }
-// This code makes use of AI-generated suggestions from ChatGPT.
-// Reference: https://apastyle.apa.org/blog/how-to-cite-chatgpt
+
     // 2. Password complexity
     public boolean checkPasswordComplexity(String password) {
         if (password.length() < 8) return false;
@@ -85,6 +84,8 @@ public class Login {
             return "Welcome " + firstName + ", " + lastName + " it is great to see you again.";
         } else {
             return "Username or password incorrect, please try again.";
+            
+           // OpenAI. (2025). ChatGPT (SEP 19 version) [Large language model]. https://chat.openai.com/chat
         }
     }
 }
