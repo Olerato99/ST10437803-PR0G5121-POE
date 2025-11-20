@@ -1,4 +1,7 @@
 com\mycompany\loginapp\Login.class
 com\mycompany\loginapp\Message.class
+com\mycompany\loginapp\MessageManager.class
 com\mycompany\loginapp\MessageStorage.class
+com\mycompany\loginapp\MessageManager$SentRecord.class
+com\mycompany\loginapp\MessageManager$1.class
 com\mycompany\loginapp\Main.class

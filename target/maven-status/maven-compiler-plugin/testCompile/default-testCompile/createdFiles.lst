@@ -1,1 +1,3 @@
 com\mycompany\loginapp\LoginTest.class
+com\mycompany\loginapp\MessageTest.class
+com\mycompany\loginapp\MessageManagerFeatureTest.class

@@ -16,7 +16,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // Registration & login (reuse your existing code)
+        // Registration & login 
         System.out.print("Enter your first name: ");
         String firstName = scanner.nextLine();
         System.out.print("Enter your last name: ");
@@ -53,15 +53,19 @@ public class Main {
         // Only allow messaging if login successful
         System.out.println("Welcome to QuickChat.");
 
+        // Initialize MessageManager and load stored messages
+        MessageManager manager = new MessageManager();
+        manager.loadStoredMessages("messages.json");
+
         // Ask user for number of messages
         System.out.print("How many messages do you want to send? ");
         int maxMessages = Integer.parseInt(scanner.nextLine());
 
         int sentMessages = 0;
-        List<Message> messages = new ArrayList<>();
+        
 
         while (true) {
-            System.out.println("\nMenu:\n1) Send Message\n2) Show recently sent messages\n3) Quit");
+            System.out.println("\nMenu:\n1) Send Message\n2) Show recently sent messages\n3) Quit\n4) Display sender & recipient of all sent messages\n5) Display longest sent message\n6) Search by message ID\n7) Search all messages to a recipient\n8) Delete a message by hash\n9) Show full sent messages report");
             System.out.print("Choose an option: ");
             int option = Integer.parseInt(scanner.nextLine());
 
@@ -99,39 +103,84 @@ public class Main {
                 String actionResult = msg.messageSent(sendOption);
                 System.out.println(actionResult);
 
-                if (sendOption == 1 || sendOption == 3) {
-                    messages.add(msg);
+                if (sendOption == 1) {
+                    // Add to manager as sent
+                    manager.addSentMessage(login.getRegisteredUsername(), msg);
                     sentMessages++;
                     // Display message details
                     System.out.println(msg.printMessageID());
                     System.out.println("Message Hash: " + msg.getMessageHash());
                     System.out.println("Recipient: " + msg.getRecipient());
                     System.out.println("Message: " + msg.getMessage());
+                } else if (sendOption == 3) {
+                    // Store message for later
+                    manager.addStoredMessage(msg);
+                    sentMessages++;
+                    System.out.println("Message stored and will be included in saved messages.");
                 } else if (sendOption == 2) {
-                    // Optionally prompt for delete/confirm, as per assignment
+                    // Disregard
+                    manager.addDisregardedMessage(msg);
+                    System.out.println("Message disregarded.");
                 }
             } else if (option == 2) {
-                // Show messages
-                if (messages.isEmpty()) {
+                // Show sent messages
+                List<MessageManager.SentRecord> sent = manager.getSentMessages();
+                if (sent.isEmpty()) {
                     System.out.println("No messages sent yet. Coming Soon.");
                 } else {
-                    for (Message m : messages) {
-                        System.out.println("\n" + m.printMessage());
+                    for (MessageManager.SentRecord r : sent) {
+                        System.out.println("\n" + r.getMessage().printMessage());
                     }
                 }
             } else if (option == 3) {
                 System.out.println("Quitting. Total messages sent: " + sentMessages);
                 break;
+            } else if (option == 4) {
+                // Display sender and recipient of all sent messages
+                List<String> list = manager.displaySendersAndRecipients();
+                if (list.isEmpty()) System.out.println("No sent messages to display.");
+                else list.forEach(System.out::println);
+            } else if (option == 5) {
+                manager.getLongestSentMessage().ifPresentOrElse(
+                        m -> System.out.println("Longest sent message: " + m.getMessage()),
+                        () -> System.out.println("No sent messages.")
+                );
+            } else if (option == 6) {
+                System.out.print("Enter message ID to search: ");
+                String id = scanner.nextLine();
+                manager.searchByMessageID(id).ifPresentOrElse(
+                        s -> System.out.println("Found: " + s),
+                        () -> System.out.println("Message ID not found.")
+                );
+            } else if (option == 7) {
+                System.out.print("Enter recipient to search for: ");
+                String rec = scanner.nextLine();
+                List<Message> found = manager.searchByRecipient(rec);
+                if (found.isEmpty()) {
+                    System.out.println("No messages found for that recipient.");
+                } else {
+                    for (Message m : found) {
+                        System.out.println(m.printMessage());
+                    }
+                }
+            } else if (option == 8) {
+                System.out.print("Enter message hash to delete: ");
+                String hash = scanner.nextLine();
+                boolean deleted = manager.deleteByMessageHash(hash);
+                System.out.println(deleted ? "Message(s) deleted." : "No message with that hash found.");
+            } else if (option == 9) {
+                System.out.println(manager.fullSentMessagesReport());
             } else {
                 System.out.println("Invalid menu option.");
             }
         }
 
         // After quitting, show total messages
-        System.out.println("Total messages sent: " + sentMessages);
+        System.out.println("Total messages sent: " + /*sentMessages*/ manager.getSentMessages().size());
 
-        // Store messages in JSON file 
-        MessageStorage.storeMessages(messages, "messages.json");
+        // Store messages in JSON file (sent + stored)
+        List<Message> toSave = manager.collectAllMessagesForSave();
+        MessageStorage.storeMessages(toSave, "messages.json");
         
         //OpenAI. (2023). ChatGPT (Oct 4 version) [Large language model]. https://chat.openai.com/chat
 

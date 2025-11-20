@@ -88,4 +88,13 @@ public class Login {
            // OpenAI. (2025). ChatGPT (SEP 19 version) [Large language model]. https://chat.openai.com/chat
         }
     }
+
+    // Added getters so other parts of the app can know the registered user/sender
+    public String getRegisteredUsername() {
+        return registeredUsername;
+    }
+
+    public String getRegisteredCellNumber() {
+        return registeredCellNumber;
+    }
 }
